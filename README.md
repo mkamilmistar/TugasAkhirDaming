@@ -1,4 +1,9 @@
 # Tugas Akhir Daming
-M. Kamil
-Mickael
-Zulkifli Sukur
+## Penentuan Keputusan Klien Berlangganan Deposito Berjangka Menggunakan Decision Tree
+M. Kamil <br>
+Mickael <br>
+Zulkifli Sukur <br>
+
+
+
+
