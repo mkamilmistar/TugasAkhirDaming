@@ -1,8 +1,12 @@
 data <- read.csv("~/R/TA/bank.csv", header = TRUE, sep = ";")
 str(data)
-summary(data)
+summary(data$balance)
 
-#library(mice)
+
+data$balance[data$balance <= 0] <- NA
+data$balance[is.na(data$balance)] <- mean (data$balance, na.rm= TRUE)
+
+library(mice)
 md.pattern(data)
 
 boxplot(data$age)
