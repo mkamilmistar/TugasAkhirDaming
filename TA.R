@@ -2,10 +2,15 @@ data <- read.csv("~/R/TA/bank.csv", header = TRUE, sep = ";")
 str(data)
 summary(data)
 
-
 data$balance[data$balance <= 0] <- NA
 data$balance[is.na(data$balance)] <- mean (data$balance, na.rm= TRUE)
 summary(data$balance)
+
+#boxplot(data$age)
+#plot(density(data$age), main="Density Plot For Age")
+
+#boxplot(data$duration)
+#plot(density(data$duration), main="Density Plot For Duration")
 
 job <- data$job
 job <- as.data.frame(job)
@@ -16,7 +21,7 @@ bank_data <- cbind(job, deposit)
 
 summary(bank_data)
 
-#who deposit vs job category
+#show who deposit vs job category
 job_data <- bank_data[which(bank_data$deposit=="yes"), ]
 summary(job_data)
 
@@ -73,12 +78,8 @@ data$y<-data_temp
 data$pdays[data$pdays==-1] <- 1000
 
 #buat colom baru recent_days dan drop pdays
+data$recent_pdays <- 1/data$pdays
+data$pdays <- NULL
 
-boxplot(data$age)
-plot(density(data$age), main="Density Plot For Age")
-
-boxplot(data$duration)
-plot(density(data$duration), main="Density Plot For Duration")
-
-
+summary(data)
 
