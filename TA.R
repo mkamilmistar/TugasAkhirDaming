@@ -1,4 +1,5 @@
-data <- read.csv("~/R/TA/bank.csv", header = TRUE, sep = ";")
+#data <- read.csv("~/R/TA/bank.csv", header = TRUE, sep = ";")
+data <- read.csv("~/Github/TugasAKhirDaming/bank.csv", header = TRUE, sep = ";")
 str(data)
 summary(data)
 
@@ -83,3 +84,78 @@ data$pdays <- NULL
 
 summary(data)
 
+
+
+################# Apriori ######################
+library(arules)
+library(arulesViz)
+data$default <- as.factor(data$default)
+data$housing <- as.factor(data$housing)
+data$loan <- as.factor(data$loan)
+data$campaign <- as.factor(data$campaign)
+data$previous <- as.factor(data$previous)
+data$y <- as.factor(data$y)
+data$recent_pdays <- as.factor(data$recent_pdays)
+data$age <- as.factor(data$age)
+data$job <- as.factor(data$job)
+data$balance <- as.factor(data$balance)
+data$education <- as.factor(data$education)
+data$marital <- as.factor(data$marital)
+data$duration <- as.factor(data$duration)
+data$poutcome <- as.factor(data$poutcome)
+
+#Apriori langsung (Setting Default bawaan package)
+rules_default <- apriori(data)
+rules_default <- sort(rules_default, by="confidence")
+inspect(rules_default[1:50])
+
+#Apriori (Panjang rules min_panjangKolom=2, max_panjangKolom=15, minsup=0.05, minconfidence=0.8)
+params = list(minlen=2, maxlen=15, support=0.05, confidence=0.8)
+rules_2 <- apriori(data, parameter = params, appearance = list
+                        (rhs = c("y=0", "y=1")))
+rules_2 <- sort(rules_2, by="confidence")
+inspect(rules_2[1:50])
+
+#Hapus data redundant
+subset_matrix <- is.subset(rules_2, rules_2)
+subset_matrix[lower.tri(subset_matrix)] <- FALSE
+redundant <- colSums(subset_matrix) > 1
+rulesPruned <- rules_2[!redundant]
+inspect(rulesPruned[1:50]) 
+#note: kayaknya masih perlu mainan nilai support atau mungkin reduksi atribut, soalnya output yg keluar kbnyakan yg y=0/No semua
+
+#Plot
+plot(rulesPruned, method="grouped")
+plot(rulesPruned, method="graph", control=list(type="items"))
+
+
+##################### Decision Tree ###############################
+library(party)
+library(caret)
+set.seed(11)
+
+indeks <- sample(2, nrow(data), replace=TRUE, prob=c(0.7,0.3))
+trainData <- data[indeks==1,]
+testData <- data[indeks==2,]
+
+myFormula <- y ~ age + job + marital + education + default +
+  housing + loan  + campaign + previous + poutcome
+
+
+### Disini kok error ya "Error in trafo(data = data, numeric_trafo = numeric_trafo, factor_trafo = factor_trafo,  : data class "character" is not supported""
+#padahal pas dicek pake sapply, semua atribut sama class y nya kebaca sbg "factor", bukan "character"
+#udah bisa deng
+
+#Pruning Maxdepth = 3
+hasil_tree <- ctree(myFormula, data=trainData, controls=ctree_control(maxdepth = 3))
+
+sapply(data, class)
+
+print(hasil_tree)
+plot(hasil_tree)
+plot(hasil_tree, type="simple")
+
+ctree_pred <- predict(hasil_tree, newdata=testData)
+
+#Akurasinya tinggi tapi kok nilai kappanya kecil bgt ya 
+confusionMatrix(ctree_pred, testData$y)
