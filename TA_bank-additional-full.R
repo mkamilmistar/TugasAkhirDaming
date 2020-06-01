@@ -105,8 +105,8 @@ min(errs)
 
 #Jalanin DT (CTREE) di error yg paling minimum 
 #dipercobaan laptop gua minimum errornya ada di indeks ke-4 gatau kalo nanti di kalian sama apa engga
-testData <- ldply(folds[6], data.frame)
-trainData <- ldply(folds[-6], data.frame)
+testData <- ldply(folds[4], data.frame)
+trainData <- ldply(folds[-4], data.frame)
 hasil_ctree <- ctree(myFormula , data=trainData, controls=ctree_control(maxdepth = 5))
 ctree_pred <- predict(hasil_ctree, newdata = testData)
 confMatrix <- table(testData$y, ctree_pred)
