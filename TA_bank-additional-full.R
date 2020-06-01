@@ -16,29 +16,17 @@ data$pdays <- as.numeric(data$pdays)
 data$previous <- as.numeric(data$previous)
 
 
-######################### KALO LANGSUNG PROSES DT (Rpart) ######################################
+##################### KALO LANGSUNG PROSES DT (CTREE) ###############################
 library(dplyr)
 library(plyr)
 library(rpart)
+library(party)
+library(caret)
+
 set.seed(11)
 myFormula <- y ~ age + job + marital + education + default + housing + loan + contact + month + day_of_week + duration + campaign + pdays + previous + poutcome + emp.var.rate + consPriceIdx + cons.conf.idx + euribor3m + nr.employed
 folds <- split(data, cut(sample(1:nrow(data)),10))
 errs <- rep(NA, length(folds))
-
-for (i in 1:length(folds)) {
-  testData <- ldply(folds[i], data.frame)
-  trainData <- ldply(folds[-i], data.frame)
-  hasil_rpart <- rpart(myFormula , data=trainData, method = "class")
-  rpart_pred <- predict(hasil_rpart, newdata = testData, type = "class")
-  confMatrix <- table(testData$y, rpart_pred)
-  errs[i] <- 1-sum(diag(confMatrix))/sum(confMatrix)
-}
-print(sprintf("average error using k-fold cross-validation: %.3f percent", 100*mean(errs)))
-
-
-##################### KALO LANGSUNG PROSES DT (CTREE) ###############################
-library(party)
-library(caret)
 
 for (i in 1:length(folds)) {
   testData <- ldply(folds[i], data.frame)
@@ -94,23 +82,12 @@ data_fix <- rbind(data_sample_no,data_yes)
 str(data_fix)
 summary(data_fix)
 
-############################## COBA PROSES DT LAGI (Rpart) ###################################
+############################## COBA PROSES DT LAGI (CTREE) ###################################
 set.seed(11)
 myFormula <- y ~ duration + age + job + marital + education + default + housing + loan + contact + month + day_of_week + campaign + previous + poutcome + emp.var.rate + consPriceIdx + cons.conf.idx + euribor3m + nr.employed
 folds <- split(data_fix, cut(sample(1:nrow(data_fix)),10))
 errs <- rep(NA, length(folds))
 
-for (i in 1:length(folds)) {
-  testData <- ldply(folds[i], data.frame)
-  trainData <- ldply(folds[-i], data.frame)
-  hasil_rpart <- rpart(myFormula , trainData, method = "class")
-  rpart_pred <- predict(hasil_rpart, newdata = testData, type = "class")
-  confMatrix <- table(testData$y, rpart_pred)
-  errs[i] <- 1-sum(diag(confMatrix))/sum(confMatrix)
-}
-print(sprintf("average error using k-fold cross-validation: %.3f percent", 100*mean(errs)))
-
-############################## COBA PROSES DT LAGI (CTREE) ###################################
 for (i in 1:length(folds)) {
   testData <- ldply(folds[i], data.frame)
   trainData <- ldply(folds[-i], data.frame)
@@ -128,8 +105,8 @@ min(errs)
 
 #Jalanin DT (CTREE) di error yg paling minimum 
 #dipercobaan laptop gua minimum errornya ada di indeks ke-4 gatau kalo nanti di kalian sama apa engga
-testData <- ldply(folds[4], data.frame)
-trainData <- ldply(folds[-4], data.frame)
+testData <- ldply(folds[6], data.frame)
+trainData <- ldply(folds[-6], data.frame)
 hasil_ctree <- ctree(myFormula , data=trainData, controls=ctree_control(maxdepth = 5))
 ctree_pred <- predict(hasil_ctree, newdata = testData)
 confMatrix <- table(testData$y, ctree_pred)
